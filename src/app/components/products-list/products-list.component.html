@@ -1,0 +1,27 @@
+<table class="table">
+
+    <thead class="table-dark">
+        <tr>
+            <th>SKU</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Unit Price</th>
+            <th>Units in Stock</th>
+            <th>Date created</th>
+            <th>Last update</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr *ngFor="let product of products">
+            <td>{{ product.sku }}</td>
+            <td>{{ product.name }}</td>
+            <td>{{ product.description }}</td>
+            <td>{{ product.unitPrice }}</td>
+            <td>{{ product.unitsInStock }}</td>
+            <td>{{ product.dateCreated }}</td>
+            <td>{{ product.lastUpdated }}</td>
+        </tr>
+    </tbody>
+
+</table>
