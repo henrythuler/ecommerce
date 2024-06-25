@@ -13,6 +13,7 @@ export class ProductsListComponent {
   products: Product[] = [];
   currentCategoryId: number = 1;
   currentCategoryName: string = "";
+  isSearch: boolean = false;
 
   constructor(private service: ProductService, private route: ActivatedRoute){}
 
@@ -23,6 +24,23 @@ export class ProductsListComponent {
   }
 
   listProducts() {
+
+    this.isSearch = this.route.snapshot.paramMap.has("keyword");
+
+    if(this.isSearch && this.route.snapshot.paramMap.get("keyword") != ""){
+      this.handleSearchProducts();
+    }else{
+      this.handleListProducts();
+    }
+
+  }
+
+  handleSearchProducts(){
+    const keyword: string = this.route.snapshot.paramMap.get("keyword")!;
+    this.service.getProductsByName(keyword).subscribe(data => this.products = data)
+  }
+
+  handleListProducts(){
 
     const hasCategoryId: boolean = this.route.snapshot.paramMap.has("id");
     const hasCategoryName: boolean = this.route.snapshot.paramMap.has("name");

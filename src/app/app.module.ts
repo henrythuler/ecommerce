@@ -7,8 +7,12 @@ import { ProductsListComponent } from './components/products-list/products-list.
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { RouterModule, Routes } from '@angular/router';
 import { MenuComponent } from './components/menu/menu.component';
+import { SearchComponent } from './components/search/search.component';
+import { ProductComponent } from './components/product/product.component';
 
 const routes: Routes = [
+  {path: "products/:id", component: ProductComponent},
+  {path: "search/:keyword", component: ProductsListComponent},
   {path: "category", component: ProductsListComponent},
   {path: "products", component: ProductsListComponent},
   {path: "category/:id/:name", component: ProductsListComponent},
@@ -21,7 +25,9 @@ const routes: Routes = [
   declarations: [
     AppComponent,
     ProductsListComponent,
-    MenuComponent
+    MenuComponent,
+    SearchComponent,
+    ProductComponent
   ],
   imports: [
     RouterModule.forRoot(routes),
