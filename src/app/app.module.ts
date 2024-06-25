@@ -5,15 +5,28 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ProductsListComponent } from './components/products-list/products-list.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { RouterModule, Routes } from '@angular/router';
+import { MenuComponent } from './components/menu/menu.component';
+
+const routes: Routes = [
+  {path: "category", component: ProductsListComponent},
+  {path: "products", component: ProductsListComponent},
+  {path: "category/:id/:name", component: ProductsListComponent},
+  {path: "category", component: ProductsListComponent},
+  {path: "", redirectTo: "/products", pathMatch: "full"},
+  {path: "**", redirectTo: "/products", pathMatch: "full"}
+]
 
 @NgModule({
   declarations: [
     AppComponent,
-    ProductsListComponent
+    ProductsListComponent,
+    MenuComponent
   ],
   imports: [
+    RouterModule.forRoot(routes),
     BrowserModule,
-    AppRoutingModule,
+    AppRoutingModule
   ],
   providers: [provideHttpClient(withInterceptorsFromDi())],
   bootstrap: [AppComponent]
