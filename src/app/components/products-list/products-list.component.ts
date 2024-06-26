@@ -11,9 +11,18 @@ import { ActivatedRoute } from '@angular/router';
 export class ProductsListComponent {
 
   products: Product[] = [];
+
   currentCategoryId: number = 1;
+  previousCategoryId: number = 1;
   currentCategoryName: string = "";
+
+  //1 because ngb component is 1 based
+  currentPage: number = 1;
+  currentPageSize: number = 5;
+  currentTotalElements: number = 0;
+  
   isSearch: boolean = false;
+  previousKeyword: string = "";
 
   constructor(private service: ProductService, private route: ActivatedRoute){}
 
@@ -26,39 +35,60 @@ export class ProductsListComponent {
   listProducts() {
 
     this.isSearch = this.route.snapshot.paramMap.has("keyword");
+    const hasCategoryId: boolean = this.route.snapshot.paramMap.has("id");
 
     if(this.isSearch && this.route.snapshot.paramMap.get("keyword") != ""){
       this.handleSearchProducts();
+    }else if(hasCategoryId){
+      const categoryId: number = +this.route.snapshot.paramMap.get("id")!;
+      this.currentCategoryId = categoryId
+      this.handleProductsByCategory(this.currentCategoryId);
     }else{
-      this.handleListProducts();
+      this.handleListAllProducts();
     }
 
   }
 
   handleSearchProducts(){
     const keyword: string = this.route.snapshot.paramMap.get("keyword")!;
-    this.service.getProductsByName(keyword).subscribe(data => this.products = data)
+
+    if(keyword != this.previousKeyword) this.currentPage = 1;
+
+    this.previousKeyword = keyword;
+
+    this.currentCategoryName = "Results for \"" + keyword + "\""
+    this.service.getProductsByName(keyword, this.currentPage - 1, this.currentPageSize).subscribe(this.processResult())
   }
 
-  handleListProducts(){
-
-    const hasCategoryId: boolean = this.route.snapshot.paramMap.has("id");
-    const hasCategoryName: boolean = this.route.snapshot.paramMap.has("name");
-
-    if(hasCategoryId){
-      this.currentCategoryId = +this.route.snapshot.paramMap.get("id")!;
-    }else{
-      this.currentCategoryId = 1
+  handleProductsByCategory(categoryId: number){
+    if(this.previousCategoryId != this.currentCategoryId){
+      this.currentPage = 1;
     }
 
-    if(hasCategoryName){
-      this.currentCategoryName = this.route.snapshot.paramMap.get("name")!;
-    }else{
-      this.currentCategoryName = "Books";
-    }
+    this.previousCategoryId = this.currentCategoryId;
+    this.currentCategoryName = this.route.snapshot.paramMap.get("name")!;
 
-    this.service.getProducts(this.currentCategoryId).subscribe((data) => this.products = data);
-
+    //-1 because on Spring the pagination is 0 based
+    this.service.getProductsByCategory(categoryId, this.currentPage - 1, this.currentPageSize).subscribe(this.processResult());
   }
 
+  handleListAllProducts(){
+    this.currentCategoryName = "All Products";
+    this.service.getAllProducts(this.currentPage - 1, this.currentPageSize).subscribe(this.processResult());
+  }
+
+  updatePageSize(pageSize: number){
+    this.currentPageSize = pageSize;
+    this.currentPage = 1;
+    this.listProducts();
+  }
+
+  private processResult(){
+    return (data: any) => {
+      this.products = data._embedded.products;
+      this.currentPage = data.page.number + 1;
+      this.currentPageSize = data.page.size;
+      this.currentTotalElements = data.page.totalElements;
+    }
+  }
 }

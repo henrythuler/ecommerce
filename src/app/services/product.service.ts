@@ -14,13 +14,26 @@ export class ProductService {
 
   constructor(private httpClient: HttpClient) {}
 
-  getProducts(categoryId: number): Observable<Product[]> {
-    const searchUrl = `${this.baseUrl}/search/findByCategoryId?id=${categoryId}`
+  getAllProducts(page: number, pageSize: number): Observable<GetResponse> {
+    const searchUrl = `${this.baseUrl}?page=${page}&size=${pageSize}`
 
-    //Unwrapping products array from _embedded
-    return this.httpClient.get<GetResponse>(searchUrl).pipe(
-      map(response => response._embedded.products)
-    )
+    return this.httpClient.get<GetResponse>(searchUrl);
+  }
+
+  getProductsByCategory(categoryId: number, page: number, pageSize: number): Observable<GetResponse> {
+    const searchUrl = `${this.baseUrl}/search/findByCategoryId?id=${categoryId}&page=${page}&size=${pageSize}`
+
+    return this.httpClient.get<GetResponse>(searchUrl);
+  }
+
+  getProductsByName(keyword: string, page: number, pageSize: number): Observable<GetResponse>{
+    const searchUrl = `${this.baseUrl}/search/findByNameContaining?keyword=${keyword}&page=${page}&size=${pageSize}`
+    return this.httpClient.get<GetResponse>(searchUrl);
+  }
+
+  getProduct(id: number): Observable<Product>{
+    const productUrl = `${this.baseUrl}/${id}`;
+    return this.httpClient.get<Product>(productUrl);
   }
 
   getProductCategories(): Observable<ProductCategory[]>{
@@ -29,24 +42,18 @@ export class ProductService {
     )
   }
 
-  getProductsByName(keyword: string): Observable<Product[]>{
-    const searchUrl = `${this.baseUrl}/search/findByNameContaining?keyword=${keyword}`
-    return this.httpClient.get<GetResponse>(searchUrl).pipe(
-      map(response => response._embedded.products)
-    )
-  }
-
-  getProduct(id: number): Observable<Product>{
-    const productUrl = `${this.baseUrl}/${id}`;
-    return this.httpClient.get<Product>(productUrl);
-  }
-
 }
 
 //The returned API Response Models
 interface GetResponse {
   _embedded: {
     products: Product[]
+  },
+  page: {
+    size: number,
+    totalElements: number,
+    totalPages: number,
+    number: number
   }
 }
 
