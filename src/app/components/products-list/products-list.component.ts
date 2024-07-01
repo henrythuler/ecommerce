@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../common/Product';
 import { ActivatedRoute } from '@angular/router';
+import { CartService } from '../../services/cart.service';
+import { CartItem } from '../../common/CartItem';
 
 @Component({
   selector: 'app-products-list',
@@ -24,7 +26,7 @@ export class ProductsListComponent {
   isSearch: boolean = false;
   previousKeyword: string = "";
 
-  constructor(private service: ProductService, private route: ActivatedRoute){}
+  constructor(private productService: ProductService, private cartService: CartService, private route: ActivatedRoute){}
 
   ngOnInit(): void{
     this.route.paramMap.subscribe(() => {
@@ -57,7 +59,7 @@ export class ProductsListComponent {
     this.previousKeyword = keyword;
 
     this.currentCategoryName = "Results for \"" + keyword + "\""
-    this.service.getProductsByName(keyword, this.currentPage - 1, this.currentPageSize).subscribe(this.processResult())
+    this.productService.getProductsByName(keyword, this.currentPage - 1, this.currentPageSize).subscribe(this.processResult())
   }
 
   handleProductsByCategory(categoryId: number){
@@ -69,18 +71,24 @@ export class ProductsListComponent {
     this.currentCategoryName = this.route.snapshot.paramMap.get("name")!;
 
     //-1 because on Spring the pagination is 0 based
-    this.service.getProductsByCategory(categoryId, this.currentPage - 1, this.currentPageSize).subscribe(this.processResult());
+    this.productService.getProductsByCategory(categoryId, this.currentPage - 1, this.currentPageSize).subscribe(this.processResult());
   }
 
   handleListAllProducts(){
     this.currentCategoryName = "All Products";
-    this.service.getAllProducts(this.currentPage - 1, this.currentPageSize).subscribe(this.processResult());
+    this.productService.getAllProducts(this.currentPage - 1, this.currentPageSize).subscribe(this.processResult());
   }
 
   updatePageSize(pageSize: number){
     this.currentPageSize = pageSize;
     this.currentPage = 1;
     this.listProducts();
+  }
+
+  addToCart(product: Product){
+    
+    this.cartService.addToCart(new CartItem(product));
+
   }
 
   private processResult(){
